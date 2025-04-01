@@ -5,6 +5,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { User } from './entities/user.entity';
 // import { JwtService } from '@nestjs/jwt';
+import { HttpException } from '@nestjs/common/exceptions/http.exception';
 
 @Injectable()
 export class UserService {
@@ -13,8 +14,23 @@ export class UserService {
     // private jwtService: JwtService,
   ) { }
 
-  create(createUserDto: CreateUserDto) {
-    return 'This action adds a new user';
+  async create(createUserDto: CreateUserDto) {
+    const { email } = createUserDto;
+
+    const existingUser = await this.createUserDto.findOne({ where: { email } });
+
+    if (existingUser) {
+      throw new HttpException('User already exists', 400);
+    }
+
+    // const payload = { email: 'user.email', sub: 'user.id', username: 'user.username' };
+
+    const add = this.createUserDto.create(createUserDto);
+
+    return {
+      userDetails: await this.createUserDto.save(add),
+      // access_token: this.jwtService.sign(payload)
+    };
   }
 
   findAll() {
