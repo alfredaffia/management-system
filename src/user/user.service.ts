@@ -5,34 +5,50 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { User } from './entities/user.entity';
 // import { JwtService } from '@nestjs/jwt';
-import { HttpException } from '@nestjs/common/exceptions/http.exception';
+import { HttpException , } from '@nestjs/common/exceptions/http.exception';
+import { ConflictException } from '@nestjs/common/exceptions/conflict.exception';
+
+import { JwtService } from '@nestjs/jwt';
 
 @Injectable()
 export class UserService {
   constructor(@InjectRepository(User)
   private createUserDto: Repository<User>,
+  private JWTService: JwtService,
     // private jwtService: JwtService,
   ) { }
 
-  async create(createUserDto: CreateUserDto) {
-    const { email } = createUserDto;
+async findEmail(email: string) {
+const userEmail = await this.createUserDto.findOneBy({ email });
+if (!userEmail) {
+  throw new ConflictException('Email already exists');
+}
+return userEmail;
+}
 
-    const existingUser = await this.createUserDto.findOne({ where: { email } });
+async user (headers:any){
+  const authorizationHeader =headers.authorization;
+  if (authorizationHeader) {
+const token = authorizationHeader.replace('Berrer ', '');
 
-    if (existingUser) {
-      throw new HttpException('User already exists', 400);
-    }
+const secret = process.env.JWTSecret;
 
-    // const payload = { email: 'user.email', sub: 'user.id', username: 'user.username' };
+try{
+  const decoded =this.JWTService.verify(token);
+  let id = decoded["id"];
+  let user =await this.createUserDto.findOneBy({id});
 
-    const add = this.createUserDto.create(createUserDto);
+  return { id: id, name: user?.firstName, email: user?.email, lastName: user?.lastName } ;
+}
+catch (error) {
+  throw new HttpException('invalid token', 401);
+  } 
+}else{
+  throw new HttpException('invalid or missing Berer token' ,401);
+}
 
-    return {
-      userDetails: await this.createUserDto.save(add),
-      // access_token: this.jwtService.sign(payload)
-    };
-  }
-
+}
+  
   findAll() {
     return `This action returns all user`;
   }
