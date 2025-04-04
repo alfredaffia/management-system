@@ -4,19 +4,46 @@ import { UpdateUserDto } from './dto/update-user.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { User } from './entities/user.entity';
-// import { JwtService } from '@nestjs/jwt';
+import { JwtService } from '@nestjs/jwt';
+import * as bcrypt from 'bcryptjs';
 import { HttpException , } from '@nestjs/common/exceptions/http.exception';
 import { ConflictException } from '@nestjs/common/exceptions/conflict.exception';
 
-import { JwtService } from '@nestjs/jwt';
 
 @Injectable()
 export class UserService {
   constructor(@InjectRepository(User)
   private createUserDto: Repository<User>,
   private JWTService: JwtService,
-    // private jwtService: JwtService,
   ) { }
+
+  async addUser(createUserDto: CreateUserDto) {
+    // const { email } = createUserDto;
+    const { id, firstName,lastName, email, password, } = createUserDto;
+
+    // Check if the user already exists
+    const existingUser = await this.createUserDto.findOne({ where: { email } });
+    if (existingUser) {
+      throw new HttpException('User already exists', 400);
+    }
+
+    const payload = { email: 'user.email', sub: 'user.id' };
+
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    const add = this.createUserDto.create({
+      id,
+      firstName,
+      lastName,
+       email,
+        password: hashedPassword,
+    });
+
+    return {
+      userDetails: add,
+      // access_token: this.JWTService.sign(payload)
+    };
+  }
 
 async findEmail(email: string) {
 const userEmail = await this.createUserDto.findOneBy({ email });
@@ -27,7 +54,7 @@ return userEmail;
 }
 
 async user (headers:any){
-  const authorizationHeader =headers.authorization;
+  const authorizationHeader = headers.authorization;
   if (authorizationHeader) {
 const token = authorizationHeader.replace('Berrer ', '');
 
@@ -50,7 +77,7 @@ catch (error) {
 }
   
   findAll() {
-    return `This action returns all user`;
+    return this.createUserDto.find();
   }
 
   findOne(id: number) {
