@@ -19,7 +19,7 @@ export class UserService {
 
   async addUser(createUserDto: CreateUserDto) {
     // const { email } = createUserDto;
-    const { id, firstName,lastName, email, password, } = createUserDto;
+    const {  firstName,lastName, email, password, } = createUserDto;
 
     // Check if the user already exists
     const existingUser = await this.createUserDto.findOne({ where: { email } });
@@ -27,17 +27,20 @@ export class UserService {
       throw new HttpException('User already exists', 400);
     }
 
-    const payload = { email: 'user.email', sub: 'user.id' };
-
     const hashedPassword = await bcrypt.hash(password, 10);
 
     const add = this.createUserDto.create({
-      id,
       firstName,
       lastName,
        email,
         password: hashedPassword,
     });
+    // const isMatch = await bcrypt.compare(password, createUserDto.password)
+    // if(!isMatch){
+    //     throw new HttpException('invalid password',404)
+    // }
+
+    const payload = { email: 'user.email', sub: 'user.id' };
 
     return {
       userDetails: add,
@@ -73,7 +76,6 @@ catch (error) {
 }else{
   throw new HttpException('invalid or missing Berer token' ,401);
 }
-
 }
   
   findAll() {
