@@ -34,17 +34,18 @@ export class UserService {
       lastName,
        email,
         password: hashedPassword,
+        
     });
     // const isMatch = await bcrypt.compare(password, createUserDto.password)
     // if(!isMatch){
     //     throw new HttpException('invalid password',404)
     // }
 
-    const payload = { email: 'user.email', sub: 'user.id' };
+    const payload = { email: 'user.email', sub: 'user.id',role:'user.role' };
 
     return {
       userDetails: add,
-      // access_token: this.JWTService.sign(payload)
+      access_token: this.JWTService.sign({ email: 'user.email', sub: 'user.id',role:'user.role' })
     };
   }
 
@@ -56,7 +57,7 @@ if (!userEmail) {
 return userEmail;
 }
 
-async user (headers:any){
+async user (headers:any):Promise<any>{
   const authorizationHeader = headers.authorization;
   if (authorizationHeader) {
 const token = authorizationHeader.replace('Berrer ', '');

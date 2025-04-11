@@ -3,16 +3,20 @@ import { UserService } from './user.service';
 import { UserController } from './user.controller';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { User } from './entities/user.entity';
+import * as dotenv from 'dotenv';
 import { JwtModule } from '@nestjs/jwt';
 import{PassportModule} from '@nestjs/passport';
 import { JwtStrategy } from 'src/auth/jwt.strategy';
+import { ConfigService } from '@nestjs/config';
+dotenv.config()
 
 @Module({
   imports: [TypeOrmModule.forFeature([User]),
 
   JwtModule.register({
+     
     global: true,
-    secret: process.env.JWTSecret,
+    secret:process.env.JWTSECRET,
     signOptions: { expiresIn: '1h' },
   }),
 
@@ -22,7 +26,11 @@ import { JwtStrategy } from 'src/auth/jwt.strategy';
   })
 ],
   controllers: [UserController],
-  providers: [UserService, JwtStrategy],
-  exports: [UserService,PassportModule , JwtStrategy]
+  providers: [UserService, 
+    JwtStrategy
+  ],
+  exports: [UserService,PassportModule , 
+    JwtStrategy
+    ]
 })
 export class UserModule {}
