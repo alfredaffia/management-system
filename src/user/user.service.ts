@@ -8,6 +8,7 @@ import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcryptjs';
 import { HttpException , } from '@nestjs/common/exceptions/http.exception';
 import { ConflictException } from '@nestjs/common/exceptions/conflict.exception';
+import { UserRole } from './enum/user.enum';
 
 
 @Injectable()
@@ -42,7 +43,7 @@ export class UserService {
     // }
 
     const payload = { email: 'user.email', sub: 'user.id',role:'user.role' };
-
+    const saveUser= await this.createUserDto.save(add) 
     return {
       userDetails: add,
       access_token: this.JWTService.sign({ email: 'user.email', sub: 'user.id',role:'user.role' })
@@ -83,13 +84,24 @@ catch (error) {
     return this.createUserDto.find();
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} user`;
+  async findOne(id: string) {
+   const findUserById= await this.createUserDto.findOneBy({ id });
+   if (!findUserById) {
+    throw new HttpException('User not found', 404);
+   }
+   return findUserById;
   }
 
-  update(id: number, updateUserDto: UpdateUserDto) {
-    return `This action updates a #${id} user`;
+  async updateUserRole(id: string, role: UserRole) {
+    const user = await this.createUserDto.findOneBy({ id });
+    if (!user) {
+      throw new Error('User not found');
+    }
+    user.role = role;
+    return this.createUserDto.save(user);
   }
+
+
 
   remove(id: number) {
     return `This action removes a #${id} user`;
