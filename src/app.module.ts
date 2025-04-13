@@ -6,6 +6,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { User } from './user/entities/user.entity';
 import { APP_GUARD} from '@nestjs/core';
 import { RoleGuard } from './auth/guards/role.guards';
+import { AuthModule } from './auth/auth.module';
 
 @Module({
   imports: [
@@ -26,7 +27,7 @@ import { RoleGuard } from './auth/guards/role.guards';
         synchronize: true,
       })
       }),
-    TodoModule, UserModule],
+    TodoModule, UserModule, AuthModule],
   controllers: [],
   providers: [
     {
