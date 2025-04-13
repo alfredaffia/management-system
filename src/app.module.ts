@@ -4,6 +4,8 @@ import { UserModule } from './user/user.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { User } from './user/entities/user.entity';
+import { APP_GUARD} from '@nestjs/core';
+import { RoleGuard } from './auth/guards/role.guards';
 
 @Module({
   imports: [
@@ -26,6 +28,11 @@ import { User } from './user/entities/user.entity';
       }),
     TodoModule, UserModule],
   controllers: [],
-  providers: [],
+  providers: [
+    {
+      provide: APP_GUARD,
+      useClass: RoleGuard,
+    },
+  ],
 })
 export class AppModule {}
