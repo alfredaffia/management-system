@@ -42,7 +42,7 @@ export class UserService {
     //     throw new HttpException('invalid password',404)
     // }
 
-    const payload = { email: 'user.email', sub: 'user.id',role:'user.role' };
+    const payload = {   };
     const saveUser= await this.createUserDto.save(add) 
     return {
       userDetails: add,
@@ -51,7 +51,7 @@ export class UserService {
   }
 
 async findEmail(email: string) {
-const userEmail = await this.createUserDto.findOneBy({ email });
+const userEmail = await this.createUserDto.findOne({ where:{ email:email}}); 
 if (!userEmail) {
   throw new ConflictException('Email already exists');
 }
@@ -61,7 +61,7 @@ return userEmail;
 async user (headers:any):Promise<any>{
   const authorizationHeader = headers.authorization;
   if (authorizationHeader) {
-const token = authorizationHeader.replace('Berrer ', '');
+const token = authorizationHeader.replace('Bearer ', '');
 
 const secret = process.env.JWTSecret;
 
@@ -76,7 +76,7 @@ catch (error) {
   throw new HttpException('invalid token', 401);
   } 
 }else{
-  throw new HttpException('invalid or missing Berer token' ,401);
+  throw new HttpException('invalid or missing Bearer token' ,401);
 }
 }
   

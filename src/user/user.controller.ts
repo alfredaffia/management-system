@@ -5,6 +5,7 @@ import { UpdateUserDto } from './dto/update-user.dto';
 import { RoleGuard } from 'src/auth/guards/role.guards';
 import { Roles } from 'src/auth/guards/role';
 import { UserRole } from './enum/user.enum';
+import { AuthGuard } from '@nestjs/passport';
 
 @Controller('user')
 export class UserController {
@@ -16,26 +17,24 @@ export class UserController {
     return this.userService.addUser(createUserDto);
   }
 
-@UseGuards(RoleGuard)
-@Roles('admin')
+@UseGuards(
+  AuthGuard(),
+   RoleGuard
+  )
+@Roles(UserRole.admin)
   @Get()
   findAll() {
     return this.userService.findAll();
   }
 
-@UseGuards(RoleGuard)
-// @Roles('admin')
-  @Get('test')
-  test() {
-    return {
-      test: 'test'
-    }
-  }
+
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.userService.findOne(id);
   }
 
+  @UseGuards(RoleGuard)
+@Roles(UserRole.admin)
   @Patch(':id')
   update(@Param('id') id: string, @Body('role') role:UserRole) {
     return this.userService.updateUserRole(id, role);
