@@ -14,7 +14,7 @@ import { UserRole } from './enum/user.enum';
 @Injectable()
 export class UserService {
   constructor(@InjectRepository(User)
-  private createUserDto: Repository<User>,
+  private userRepository: Repository<User>,
   private JWTService: JwtService,
   ) { }
 
@@ -23,35 +23,35 @@ export class UserService {
     const {  firstName,lastName, email, password, } = createUserDto;
 
     // Check if the user already exists
-    const existingUser = await this.createUserDto.findOne({ where: { email } });
+    const existingUser = await this.userRepository.findOne({ where: { email } });
     if (existingUser) {
       throw new HttpException('User already exists', 400);
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    const add = this.createUserDto.create({
+    const add = this.userRepository.create({
       firstName,
       lastName,
        email,
         password: hashedPassword,
         
     });
-    // const isMatch = await bcrypt.compare(password, createUserDto.password)
+    // const isMatch = await bcrypt.compare(password, userRepository.password)
     // if(!isMatch){
     //     throw new HttpException('invalid password',404)
     // }
 
-    const payload = {   };
-    const saveUser= await this.createUserDto.save(add) 
+    const payload = { email: 'user.email', sub: 'user.id',role:'user.role' };
+    const saveUser= await this.userRepository.save(add) 
     return {
       userDetails: add,
-      access_token: this.JWTService.sign({ email: 'user.email', sub: 'user.id',role:'user.role' })
+      access_token: this.JWTService.sign(payload)
     };
   }
 
 async findEmail(email: string) {
-const userEmail = await this.createUserDto.findOne({ where:{ email:email}}); 
+const userEmail = await this.userRepository.findOne({ where:{ email:email}}); 
 if (!userEmail) {
   throw new ConflictException('Email already exists');
 }
@@ -68,7 +68,7 @@ const secret = process.env.JWTSecret;
 try{
   const decoded =this.JWTService.verify(token);
   let id = decoded["id"];
-  let user =await this.createUserDto.findOneBy({id});
+  let user =await this.userRepository.findOneBy({id});
 
   return { id: id, name: user?.firstName, email: user?.email, lastName: user?.lastName } ;
 }
@@ -81,11 +81,11 @@ catch (error) {
 }
   
   findAll() {
-    return this.createUserDto.find();
+    return this.userRepository.find();
   }
 
   async findOne(id: string) {
-   const findUserById= await this.createUserDto.findOneBy({ id });
+   const findUserById= await this.userRepository.findOneBy({ id });
    if (!findUserById) {
     throw new HttpException('User not found', 404);
    }
@@ -93,12 +93,12 @@ catch (error) {
   }
 
   async updateUserRole(id: string, role: UserRole) {
-    const user = await this.createUserDto.findOneBy({ id });
+    const user = await this.userRepository.findOneBy({ id });
     if (!user) {
       throw new Error('User not found');
     }
     user.role = role;
-    return this.createUserDto.save(user);
+    return this.userRepository.save(user);
   }
 
 
