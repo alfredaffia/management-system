@@ -1,12 +1,9 @@
 import { Module } from '@nestjs/common';
-import { TodoModule } from './todo/todo.module';
 import { UserModule } from './user/user.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { User } from './user/entities/user.entity';
-import { APP_GUARD} from '@nestjs/core';
-import { RoleGuard } from './auth/guards/role.guards';
-import { AuthModule } from './auth/auth.module';
+
 
 @Module({
   imports: [
@@ -27,13 +24,8 @@ import { AuthModule } from './auth/auth.module';
         synchronize: true,
       })
       }),
-    TodoModule, UserModule, AuthModule],
+   UserModule],
   controllers: [],
-  providers: [
-    {
-      provide: APP_GUARD,
-      useClass: RoleGuard,
-    },
-  ],
+  providers: [  ],
 })
 export class AppModule {}
