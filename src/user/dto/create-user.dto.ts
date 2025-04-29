@@ -14,4 +14,8 @@ export class CreateUserDto {
     @IsEmail()
     email: string;
 
+    @IsString()
+    @IsNotEmpty()
+    career: string;
+
 }
